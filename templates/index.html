@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block css %}
+<style>
+    .container {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 16px;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 560px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    textarea,
+    select {
+        width: 100%;
+        border-radius: 6px;
+        border: 1px solid #495057;
+        background: #343a40;
+        color: inherit;
+        font: inherit;
+        padding: 8px 10px;
+    }
+
+    textarea {
+        min-height: 140px;
+        resize: vertical;
+    }
+
+    .counter {
+        font-size: 0.85rem;
+        color: #adb5bd;
+        text-align: right;
+        margin-top: 4px;
+    }
+
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .controls select {
+        flex: 1 1 200px;
+        width: auto;
+    }
+
+    .controls label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+
+    button,
+    .download {
+        border: none;
+        border-radius: 6px;
+        padding: 8px 18px;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        background: #0d6efd;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    button:hover,
+    .download:hover {
+        background: #0b5ed7;
+    }
+
+    .error {
+        padding: 10px 12px;
+        border-radius: 6px;
+        background: #58151c;
+        border: 1px solid #842029;
+        color: #f8d7da;
+    }
+
+    .result {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+    }
+
+    audio {
+        flex: 1 1 260px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<main class="container">
+    <div class="card">
+        <h1>Text to Speech</h1>
+
+        {% if error %}
+        <div class="error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('index') }}">
+            <div>
+                <textarea id="text" name="text" maxlength="{{ max_length }}" placeholder="Type something to hear it…"
+                    aria-label="Text to speak" required>{{ text }}</textarea>
+                <div class="counter"><span id="count">{{ text|length }}</span> / {{ max_length }}</div>
+            </div>
+
+            <div class="controls">
+                <select name="language" aria-label="Language">
+                    {% for code, name in languages.items() %}
+                    <option value="{{ code }}" {% if code == language %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <label><input type="checkbox" name="slow" {% if slow %}checked{% endif %}> Slow</label>
+                <button type="submit">Speak</button>
+            </div>
+        </form>
+
+        {% if audio_src %}
+        <div class="result">
+            <audio controls autoplay src="{{ audio_src }}"></audio>
+            <a class="download" href="{{ audio_src }}" download="{{ audio_filename }}">Download MP3</a>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+    const textarea = document.getElementById("text");
+    const count = document.getElementById("count");
+    textarea.addEventListener("input", () => { count.textContent = textarea.value.length; });
+</script>
+{% endblock %}
